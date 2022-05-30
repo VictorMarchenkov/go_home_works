@@ -38,21 +38,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	//_, err := os.ReadDir(mainDir)
-	//if err != nil {
-	//	err = os.Mkdir(mainDir, 0750)
-	//	if err != nil {
-	//		fmt.Errorf("error сan't create a directory %v", err)
-	//	}
-	//}
-	//_, err = os.ReadDir(directory)
-	//if err != nil {
-	//	err = os.Mkdir(directory, 0750)
-	//	if err != nil {
-	//		fmt.Errorf("error сan't create a directory %v", err)
-	//	}
-	//}
-
 	clearDirectory(directory)
 	createFiles(directory, nFiles)
 }
@@ -86,9 +71,6 @@ func createFiles(directory string, n int) {
 		fName = fmt.Sprintf("file%d.txt", i)
 		path = fmt.Sprintf("%s/%s", directory, fName)
 		_, err := os.Create(path)
-		//defer func() {
-		//	d.Close()
-		//}()
 		if err != nil {
 			fmt.Printf("\nerror creating file %s err:%s\n", fName, err)
 		}
@@ -97,7 +79,6 @@ func createFiles(directory string, n int) {
 				if v := recover(); v != nil {
 					//fmt.Printf("recover after panic - : %s\n", v)
 					err = NewCustomError(fName, t, fmt.Errorf("there was an error"))
-
 					fmt.Println(err)
 				}
 			}()

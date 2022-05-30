@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"path"
 	"time"
@@ -28,9 +29,29 @@ func (ve *customError) Error() string {
 
 func main() {
 	var (
-		directory = "task3/test"
+		directory = "test"
 		nFiles    = 10 //1000000
 	)
+
+	err := os.Mkdir(directory, 0750)
+	if err != nil && !os.IsExist(err) {
+		log.Fatal(err)
+	}
+
+	//_, err := os.ReadDir(mainDir)
+	//if err != nil {
+	//	err = os.Mkdir(mainDir, 0750)
+	//	if err != nil {
+	//		fmt.Errorf("error сan't create a directory %v", err)
+	//	}
+	//}
+	//_, err = os.ReadDir(directory)
+	//if err != nil {
+	//	err = os.Mkdir(directory, 0750)
+	//	if err != nil {
+	//		fmt.Errorf("error сan't create a directory %v", err)
+	//	}
+	//}
 
 	clearDirectory(directory)
 	createFiles(directory, nFiles)
@@ -40,7 +61,7 @@ func main() {
 func clearDirectory(directory string) {
 	dir, err := ioutil.ReadDir(directory)
 	if err != nil {
-		fmt.Printf("", err)
+		fmt.Printf("%v:", err)
 	}
 	for _, d := range dir {
 		os.RemoveAll(path.Join([]string{directory, d.Name()}...))
@@ -50,15 +71,24 @@ func clearDirectory(directory string) {
 // createFiles generate new files.
 func createFiles(directory string, n int) {
 	var fName, path string
+	_, err := os.ReadDir(path)
+	if err != nil {
+		err = os.Mkdir(path, 0750)
+		if err != nil && !os.IsExist(err) {
+			//	log.Fatal(err)
+			fmt.Printf("сan't create a directory %v", err)
+		}
+	}
+
 	fakePanicSlice := [2]int{0, 0}
 	for i := 0; i < n; i++ {
 		t := time.Now().Format("2006-01-02 15:04:05,000")
 		fName = fmt.Sprintf("file%d.txt", i)
 		path = fmt.Sprintf("%s/%s", directory, fName)
-		d, err := os.Create(path)
-		defer func() {
-			d.Close()
-		}()
+		_, err := os.Create(path)
+		//defer func() {
+		//	d.Close()
+		//}()
 		if err != nil {
 			fmt.Printf("\nerror creating file %s err:%s\n", fName, err)
 		}
@@ -67,16 +97,13 @@ func createFiles(directory string, n int) {
 				if v := recover(); v != nil {
 					//fmt.Printf("recover after panic - : %s\n", v)
 					err = NewCustomError(fName, t, fmt.Errorf("there was an error"))
+
 					fmt.Println(err)
 				}
 			}()
 			if i == 3 { // create conditions for implicit panic
 				fmt.Println(fakePanicSlice[i])
 			}
-
-			//if i == 99 {
-			//	panic("BBBBBBBB!!!!")
-			//}
 
 		}()
 	}
